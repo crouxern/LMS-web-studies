@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0051)https://www.mconline.sg/LEAD/Login/lms_LoginLX.aspx -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>LEAD Login</title>
+		<meta name="GENERATOR" content="Microsoft Visual Studio .NET 7.1">
+		<meta name="CODE_LANGUAGE" content="C#">
+		<meta name="vs_defaultClientScript" content="JavaScript">
+		<meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5">
+	<style type="text/css">
+:root #adss
+{ display: none !important; }</style></head>
+	<body ms_positioning="GridLayout">
+		https://www5.mconline.sg       
+        <br>
+        MCEWEB05
+        <iframe style="width:1px; height:1px;display:none;" id="refreshsession" src="./keepAlive.html"></iframe>
+        <iframe style="width:1px; height:1px;display:none;" id="cleanupsession" src="./dna_cleanup.html"></iframe>
+	
+    <script language="javascript" type="text/javascript">
+        var intervalTime = 600000; //10 minute 600000
+        var bflag = false;
+        var katimer, looptimer;
+        window.onload = function () {
+            var o = document.getElementsByTagName('iframe')[0];
+            o.contentWindow.postMessage('MCEWEB05', 'https://www5.mconline.sg');
+            katimer = setTimeout(function () {
+                if (!bflag) {
+                    keepalive("getserver");
+                }
+            }, 10000);
+            looptimer = setTimeout("keepalive()", intervalTime);
+        };
+        window.addEventListener('message', receiver, false);
+        function receiver(e) {
+            if (e.origin == 'https://www5.mconline.sg') {//alert(e.data);
+                if (e.data == 'MCEWEB05') {
+                    bflag = true;
+                    document.getElementsByTagName('iframe')[1].src = "https://www5.mconline.sg/SchoolDNA/Login/dna_cleanup.aspx";
+                    clearTimeout(katimer);
+                }
+            }
+        }
+        function keepalive(action) {
+            clearTimeout(looptimer);
+            var tail = (action == undefined ? ('?r=' + Math.random()) : ('?r=' + Math.random() + '&action=' + action + '&name=MCEWEB05'));
+            var url = window.location.href.split('?')[0];
+            window.location = url + tail;
+        }
+	</script>
+
+</body></html>

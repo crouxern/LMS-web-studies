@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<!-- saved from url=(0051)https://www.mconline.sg/LEAD/Login/lms_loginL.aspx? -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Marshall Cavendish Education</title>
+		<meta content="Microsoft Visual Studio .NET 7.1" name="GENERATOR">
+		<meta content="C#" name="CODE_LANGUAGE">
+		<meta content="JavaScript" name="vs_defaultClientScript">
+		<meta content="http://schemas.microsoft.com/intellisense/ie5" name="vs_targetSchema">
+        <link rel="stylesheet" href="./style(1).css" type="text/css">
+        <link rel="stylesheet" href="./normalize.css" type="text/css">
+        <link rel="stylesheet" href="./flexslider.css" type="text/css">
+        <!--[if lt IE 9]> <link rel="stylesheet" href="https://www.mconline.sg/s3/css/login/ie.css"/> <script src="js/css3-mediaqueries.js"></script> <![endif]-->
+        <style>
+            body{min-width:255px;width:255px;}
+            .lms-login{font-family: 'dax_bold';padding:52px 15px 0; }
+            .lms-login h3 { font-size:20px; font-weight:normal; color:#f15c25;}
+            .lms-login p { font-size:14px;padding-top:15px;}
+            .lms-login p a { color:#fff;}
+            .lms-login label { display:block; font-size:13px; color:#fff;}
+            .lms-login input[type="text"] { width:220px;  font-family:'arial'; padding:5px;font-size:12pt;}
+            .lms-login input[type="password"] { width:220px;  font-family:'dax_reg'; padding:5px;font-size:12pt;}
+            .lms-login ul { text-align:center;}
+            .lms-login ul li { padding:8px 0; text-align:left;}
+            .lms-login .login-btn { text-align:center;}
+            .lms-login .login-btn input[type="button"] { font-size:16px; font-family:'dax_bold'; color:#fff; background:#e6541c; padding:7px 30px; box-shadow:inset 0.1em 0.1em 2px #000; border:none; border-radius:5px;}
+            .action-links, .auto-complete{font-size: 0.8em;position: absolute;width: 240px;padding: 2px;z-index: 1000;visibility: hidden;line-height: 1.5em;list-style: none;border-left: 1px solid #EFEFEF;border-top: 1px solid #EFEFEF;
+                border-bottom: 2px solid #DFDFDF;border-right: 2px solid #BFBFBF;background: #FFFFFF;}
+            .action-links li, .auto-complete li{color: #069;font-weight: bold;padding: 3px 2px;}
+            .auto-complete li{font-size: 1.2em;font-weight: normal;}
+            .auto-complete li strong{font-weight: bolder;}
+            .action-links li:hover{cursor: pointer;background: #D0E8FF;}
+            .auto-complete li.active{cursor: pointer;background: #D0E8FF;}
+        </style>
+		<script language="javascript" src="./lms_login.js.download"></script><style type="text/css">
+:root #adss
+{ display: none !important; }</style>
+        <script type="text/javascript" src="./jquery-1.11.3.min.js.download"></script>
+        <script type="text/javascript" src="./login.js.download"></script>
+		<script language="javascript" src="./ajax.js.download"></script>        
+        <script type="text/javascript">
+            window.onload = function () {
+                initPage();
+                initLogin();
+            }
+		function initPage()
+		{
+		    var cluster_id = "";
+			var strDenyReason = "denied_empty"
+			if (strDenyReason != "denied_empty" && strDenyReason != "logout")
+			{
+			    parent.location.href = "lms_login_pr.aspx?e=" + strDenyReason;
+			}
+			if (window.navigator.cookieEnabled)  {
+				document.getElementById("UID").disabled = false;
+				document.getElementById("UID").style.backgroundColor = "white";
+				document.getElementById("txtSchool").disabled = false;
+				document.getElementById("txtSchool").style.backgroundColor = "white";
+				document.getElementById("txtSchool").value = "fps";
+				document.getElementById("PWD").disabled = false;
+				document.getElementById("PWD").style.backgroundColor = "white";
+				if (document.getElementById("txtIsSilent")==null)
+					document.getElementById("UID").focus();
+			} else {
+				alert(var_err_cookie);				
+			}
+			// 20070405 Wee:  if vendor is litespeed proceed to login without the need to click on the silent login button. requested by litespeed.
+            if ("" == "litespeed")  
+				postdata();
+		}
+		function login(){
+		    if ($("#UID").val() != "" && $("#txtSchool").val() != "" && $("#PWD").val() != "") {
+                if ($("#SCH").val() == "") {
+                    $("#SCH").val($("#txtSchool").val());
+                }
+                validateSch();
+            }else if ($("#UID").val() == "")
+                $("#UID").focus();
+            else if ($("#txtSchool").val() == "")
+                $("#txtSchool").focus();
+            else if ($("#PWD").val() == "")
+                $("#PWD").focus();
+		}
+		function NewWindow(mypage, myname, w, h, scroll, resizable)
+		{
+			var winl = (screen.width - w) / 2;
+			var wint = (screen.height - h) / 2;
+			winprops = 'height='+h+',width='+w+',top='+wint+',left='+winl+',scrollbars='+scroll+', resizable='+resizable;
+			win = window.open(mypage, myname, winprops);
+			if (parseInt(navigator.appVersion) >= 4) { try{ win.window.focus(); } catch(e){ } }
+		}
+		function toProblem()
+		{ 
+			parent.location.href ="lms_login_pwd.aspx";
+		}
+		var prev_user = "";
+		function openInstructionsWindow(){
+			var sInstructionsURL = "LeadFlashPlayer.htm";
+			var sPlatform = (navigator.platform)? navigator.platform.toLowerCase(): "";
+			if (sPlatform && (sPlatform.indexOf("mac") > -1)) {
+				sInstructionsURL = "LeadFlashPlayerMAC.htm";
+			} else {
+				if(navigator.userAgent.indexOf("MSIE") > -1) {
+					sInstructionsURL = "LeadFlashPlayer.htm";
+				} else if(navigator.userAgent.indexOf("Mozilla") > -1) {
+					sInstructionsURL = "LeadFlashPlayerFF.htm";
+				} else {
+					sInstructionsURL = "LeadFlashPlayer.htm";
+				}
+			}
+			NewWindow("/LEAD/Logon/" + sInstructionsURL, "LEADFlashPlayer", "700", "480", "yes", "yes");
+		}
+		//-->
+	</script>
+	</head>
+		<body marginwidth="0" marginheight="0">
+		    <div class="lms-login">
+            <h3>Login </h3>
+            <div class="clr"></div>
+            <form action="https://www.mconline.sg/LEAD/Login/lms_loginL.aspx?" method="post" id="loginform" name="loginform" class="form-horizontal">	
+                <div class="login">
+	            <ul>
+		            <li>
+			            <label for="">Login ID</label>
+			            <input type="text" id="UID" name="UID" placeholder="Login ID" maxlength="30" class="login-input" autocomplete="off" style="background-color: white;">
+		            </li>
+		            <li>
+			            <label for="">School</label>
+			            <input type="text" id="txtSchool" name="txtSchool" placeholder="School Name/ID/Code" maxlength="200" class="login-input" autocomplete="off" style="background-color: white;">
+		            </li>
+		            <li>
+			            <label for="">Password</label>
+			            <input type="password" id="PWD" name="PWD" placeholder="Password" maxlength="30" class="login-input" autocomplete="off" style="background-color: white;">
+		            </li>
+	            </ul>
+                </div>
+	            <div class="login-btn"><input type="button" name="" value="Login" class="hover" id="lnkGoButton" onclick="javascript:login();"></div>
+            <p style="text-align:center;padding-top:8px;">
+                <a href="https://www.mconline.sg/LEAD/Login/lms_login_pwd.aspx" target="_parent" style="font-size:1.4em;font-weight:bold;">Reset My Password</a><br>
+	            <script type="text/javascript">
+	                var strPath = window.location.href.toLowerCase().replace("https", "http");
+	                try {
+	                    strDomain = strPath.substring(0, strPath.indexOf("lead/") + 5);
+	                    strPath = strDomain + "Login/";
+	                } catch (e) { }
+	                document.write('<a href="' + strPath + 'contact_us_tech_support.html" target="_parent">Help</a> |'); 
+	            </script><a href="http://www.mconline.sg/lead/Login/contact_us_tech_support.html" target="_parent">Help</a> |
+                <a onclick="NewWindow(this.href,&#39;DownloadViewer&#39;,&#39;640&#39;,&#39;480&#39;, &#39;yes&#39;, &#39;yes&#39;);return false;" href="http://www.mconline.sg/lead/Logon/Dna_DownloadViewers.htm">System Check</a> &nbsp; 
+            </p>
+			<p style="margin-top:-8px;font-size:0.7em;">For authorised use only. Unauthorised use is strictly prohibited.</p>
+		<input type="hidden" name="SCH" value="" id="SCH">
+		<input type="hidden" name="txtIsSchool" value="False" id="txtIsSchool">
+		<input type="hidden" name="txtIsParent" value="false" id="txtIsParent">		
+		<input type="hidden" name="txtIsCluster" id="txtIsCluster" value="">
+		<input type="hidden" name="router" id="router" value="">
+		<input type="hidden" name="login_id" id="login_id" value="eanx2axiku2xic3fxrnjjhd2">
+		<input type="hidden" name="server_id" id="server_id" value="MCEWEB04">		
+		<input type="hidden" name="ency_id" id="ency_id" value="true">		
+		<input type="hidden" name="key" id="key" value="C8564E34-6455-472E-A68F-EDFFF33FB108">
+		
+		</form>		
+        </div>
+	
+	<script type="text/javascript">
+	    if (window.parent.browser != null) {
+	        var oldbrowser = false;
+	        if (window.parent.browser == "MSIE" && window.parent.browserVersion < 8)
+	            oldbrowser = true;
+	        else if (window.parent.browser == "Firefox" && window.parent.browserVersion < 11)
+	            oldbrowser = true;
+	        else if (window.parent.browser == "Chrome" && window.parent.browserVersion < 11)
+	            oldbrowser = true;
+	        else if (window.parent.browser == "Safari" && window.parent.browserVersion < 5)
+	            oldbrowser = true;
+
+	        if (oldbrowser) {
+	            $(".controls").css({ "width": "auto", "margin-left": "0", "padding-left": "0" });
+	            $(".login").css({ "margin-top": "0px" });
+	        }
+	    }   
+	</script>
+
+</body></html>

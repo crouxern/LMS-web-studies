@@ -1,0 +1,116 @@
+$(window).load(function () {
+    var menuLinks = [{ "name": "Home", "link": "lms_login.aspx" },
+                        { "name": "About Us", "link": "", "submenu": [{ "name": "Our Story", "link": "about_our_story.html" }, { "name": "Our Journey", "link": "about_our_journey.html" }, { "name": "Our Values", "link": "about_our_values.html"}] },
+                        { "name": "Success Stories", "link": "", "submenu": [{ "name": "Singapore Success Stories", "link": "success_stories_singapore.html" }, { "name": "International Success Stories", "link": "success_stories_international.html"}] },
+                        { "name": "Our Solutions", "link": "", "submenu": [{ "name": "Learning Systems", "link": "our_solutions_learning_system.html" }, { "name": "Content Solutions", "link": "our_solutions_content_solutions.html" }, { "name": "Services", "link": "our_solutions_services.html"}] },
+                        { "name": "Contact Us", "link": "", "submenu": [{ "name": "Technical Support", "link": "contact_us_tech_support.html" }, { "name": "FAQ", "link": "LeadHelp/login_help.htm", "target": "new"}] },
+                        { "name": "Our Websites", "link": "", "submenu": [{ "name": "USA", "link": "http://www.mceducation.us", "target": "_blank" }, { "name": "Philippines", "link": "http://www.leadlms.com.sg", "target": "_blank" }, { "name": "Other Countries", "link": "http://edu.mconline.sg", "target": "_blank"}] }
+        ];
+
+    var html = '';
+    var strDomain = "";
+    var strPath = window.location.href.toLowerCase().replace("https", "http");
+    try {
+        strDomain = strPath.substring(0, strPath.indexOf("lead/") + 5);
+        strPath = strDomain + "Login/";
+    } catch (e) { }
+    $(menuLinks).each(function (index, menu) {
+        if (menu.submenu !== undefined) {
+            html += '<li><span>' + menu.name + '</span><ul class="sub-menu">';
+            $(menu.submenu).each(function (subindex, sub) {
+                if (sub.target !== undefined) {
+                    if (sub.target !== "new")
+                        html += '<li><a href="' + sub.link + '" target="' + sub.target + '">' + sub.name + (subindex == -0 ? ' <p></p>' : '') + '</a></li>';
+                    else
+                        html += '<li><a href="' + strDomain + sub.link + '" target="_blank">' + sub.name + (subindex == -0 ? ' <p></p>' : '') + '</a></li>';
+                }
+                else
+                    html += '<li><a href="' + strPath + sub.link + '">' + sub.name + (subindex == -0 ? ' <p></p>' : '') + '</a></li>';
+            });
+            html += '</ul></li>';
+        } else {
+            if (menu.link !== "") {
+                html += '<li><a href="' + strPath + menu.link + '">' + menu.name + '</a></li>';
+            } else {
+                html += '<li>' + menu.name + '</li>';
+            }
+        }
+    });
+    $(".menu").html('<ul>' + html + '</ul><div class="clr"></div>');
+
+    // hide social-icons 
+    //$('.social-icon').css({ visibility: "hidden" });
+	$('.social-icon1').bind('click',function(){
+		window.open('https://www.facebook.com/mceducation');
+	});
+
+    // SUSTITUTE FOR CSS FIRST-AND LAST-CHILD
+    $('.class-name li').last().css('margin-right', 0);
+
+    // INPUT FIELD AUTO CLEAR
+    if ($('.clearField').length > 0)
+        $('.clearField').clearField();
+
+    // PAGE LOADING
+    setTimeout(function () {
+        $(".loading").remove();
+        $('body').removeClass('hide');
+    }, 1000);
+
+    $('.menu li').mouseenter(function () {
+        $('.sub-menu', this).stop(true, true).show();
+    });
+
+    $('.menu li').mouseleave(function () {
+        $('.sub-menu', this).stop(true, true).hide();
+    });
+
+    $('.sub-menu li').mouseenter(function () {
+        $('.s-sub-menu', this).slideDown(20);
+    });
+
+    $('.sub-menu li').mouseleave(function () {
+        $('.s-sub-menu', this).slideUp(20);
+    });
+
+    if ($('.flexslider').length > 0) {
+        $('.flexslider').flexslider({
+            animation: "fade",
+            animationSpeed: 400,
+            directionNav: false
+        });
+    }   
+
+    $(".logo-mco").bind("click", function (event) {
+        event.preventDefault();
+        window.location.href = "http://www.mconline.sg";
+    });
+
+    $(".btn-launch").bind("click", function (event) {
+        event.preventDefault();
+        var directory = 'trials/' + $(this).attr("action");
+        var w = screen.width; var h = screen.height;
+        var winprops = 'height=' + h + ',width=' + w + ',top=0,left=0,scrollbars=0, resizable=0';
+        var mypage = directory + "/index.htm";
+        window.open(mypage, "_blank", winprops);
+        return false;
+    });
+
+    $("#btnSearch").bind("click", function (event) {
+        event.preventDefault();
+        if (window.location.href.indexOf("search.html") < 0)
+            window.location = strPath + "search.html?q=" + $("#txtSearch").val();
+        else
+            doSearch($("#txtSearch").val());
+    });
+    $("#txtSearch").bind("keydown", function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            if (window.location.href.indexOf("search.html") < 0)
+                window.location = strPath + "search.html?q=" + $("#txtSearch").val();
+            else
+                doSearch($("#txtSearch").val());
+        }
+    });
+
+});

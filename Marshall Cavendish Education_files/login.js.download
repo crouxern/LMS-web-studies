@@ -1,0 +1,290 @@
+﻿var TEMPLATES = {
+    Schools: "<li id=\"#Name\" class=\"entry\">#FullName</li>"
+};
+
+function initLogin() {
+    $.post("LoginL.aspx", { action: "Schools" },
+    function(data) {
+        try {
+            if (data != "") {
+                data = $.parseJSON(data);
+                window.pageData = data;
+                loadSchools();
+            } else
+                return;
+        } catch (e) { }
+    })
+}
+$(document).ready(function() {
+    $("#loginform").bind("keydown", function(event) {
+        if (event.keyCode === 13) {
+            if ($("#UID").val() !== "" && $("#txtSchool").val() !== "" && $("#PWD").val() !== "") {
+                if ($("#SCH").val() === "") {
+                    $("#SCH").val($("#txtSchool").val());
+                }
+                validateSch();
+            }
+            event.preventDefault();
+        }
+    });
+});
+function validateSch() {
+    var schools = window.pageData;
+    var txtSch = $("#txtSchool").val();
+    $("#SCH").val("");
+    for (var i = 0; i < schools.length; i++) {
+        if (schools[i]["FullName"].replace(/@apos;/g, "'") === txtSch) {
+            $("#SCH").val(schools[i]["Name"]);
+            break;
+        } else if (schools[i]["Name"] === txtSch) {
+            $("#SCH").val(txtSch);
+            break;
+        } else if (schools[i]["Num"] === txtSch) {
+            $("#SCH").val(schools[i]["Name"]);
+            break;
+        }
+    } if ($("#SCH").val() === "")
+            $("#SCH").val(txtSch);
+    if ($(".control-label[for='inputEmail']").html() === "Child's ID" && $("#SCH").val() !== "NYGH") {
+        $("#UID").val("p_" + $("#UID").val());
+    }
+    if ($("#SCH").val() === "") {
+        alert("Please enter a valid school ID, name or code.");
+        $("#txtSchool").focus();
+        return;
+    } else {
+        postdata();
+    }
+}
+function loadSchools() {
+    $("#txtSchool").bind("click keydown", function(event) {
+
+        if (event.keyCode == 13) {
+
+            if (($(".auto-complete").length > 0) &&
+                ($(".auto-complete").css("visibility") == "visible")) {
+
+                $(".auto-complete li.active").click();
+
+                addSchool(event);
+
+            }
+            event.preventDefault();
+        }
+        if (event.keyCode == 9) {
+            hideAutoCompleteSchools();
+        }
+
+        if ((event.keyCode == 38) || (event.keyCode == 40)) {
+            if (($(".auto-complete").length > 0) &&
+                ($(".auto-complete").css("visibility") == "visible")) {
+
+                $(".auto-complete li").each(function(index, elem) {
+
+                    if ($(elem).hasClass("active")) {
+                        var newIndex = (event.keyCode == 38) ? index - 1 : index + 1;
+
+                        if (newIndex < 0) return;
+
+                        if ($($(".auto-complete li").get(newIndex)).length > 0) {
+
+                            $(".auto-complete li").removeClass("active");
+                            $($(".auto-complete li").get(newIndex)).addClass("active");
+                            $("#txtSchool").val(($($(".auto-complete li").get(newIndex)).html()));
+                            $("#SCH").val(($($(".auto-complete li").get(newIndex)).attr("id")));
+                        }
+
+                        return false;
+                    }
+                });
+            }
+        }
+    });
+    $("#txtSchool").bind("keyup", function(event) {
+
+        if ((event.keyCode == 13) || (event.keyCode == 38) || (event.keyCode == 40)) {
+
+            event.preventDefault();
+            return;
+        }
+
+        if (!window.pageData) {
+
+            if (window.timeoutSchools) {
+
+                window.clearTimeout(window.timeoutSchools);
+                window.timeoutSchools = null;
+            }
+
+            window.timeoutSchools = setTimeout(function() {
+
+                if (window.pageData)
+                    loadSchoolsAutoComplete();
+
+            }, 1000);
+        }
+
+        loadSchoolsAutoComplete();
+    });    
+}
+
+function bindDataToTemplate(template, data) {
+
+    var pattern = /#\w+/g;
+    var htmlArray = [];
+
+    for (var i = 0; i < data.length; i++) {
+
+        var temp = template;
+        var matches = temp.match(pattern);
+
+        for (var j = 0; j < matches.length; j++) {
+
+            var text = matches[j];
+            var property = text.slice(1);
+            if (text == "#FName")
+                temp = temp.replace("#FName", escape(data[i]["FullName"]));
+            else if (text == "#FullName")
+                temp = temp.replace("#FullName", data[i][property].replace(/@apos;/g,"'"));
+            else 
+            temp = temp.replace(text, data[i][property]);
+        }
+
+        htmlArray.push(temp);
+    }
+
+    return htmlArray.join("");
+}
+
+function loadSchoolsAutoComplete() {
+
+    hideAutoCompleteSchools();
+
+    var keyword = $.trim($("#txtSchool").val());
+
+    if (keyword == "" || keyword.toLowerCase() == "primary" || keyword.toLowerCase() == "secondary") {
+        hideAutoCompleteSchools();
+        return;
+    }
+    var data = window.pageData;
+    var Schools = data, items = [];
+
+    if (!data && (data.length == 0)) return;
+
+    var regex = new RegExp(keyword.toUpperCase(), "gi");
+
+    for (var i = 0; i < Schools.length; i++) {
+
+        if (items.length == 10) break;
+
+        var matches = Schools[i]["FullName"].match(regex) || Schools[i]["Name"].match(regex) || Schools[i]["Num"].match(regex);
+
+        if (!matches) continue;
+
+        items.push({ Num: Schools[i]["Num"], Name: Schools[i]["Name"], FullName: Schools[i]["FullName"] });
+
+        var temp = items[items.length - 1];
+        for (var j = 0; j < matches.length; j++) {
+
+            temp["FullName"] = temp["FullName"].replace(matches[j],
+                matches[j]);
+        }
+    }
+
+    if (items.length < 10) {
+
+        regex = new RegExp(keyword, "i");
+
+        for (var i = 0; i < Schools.length; i++) {
+
+            if (items.length == 10) break;
+
+            var matches = Schools[i]["FullName"].match(regex) || Schools[i]["Name"].match(regex) || Schools[i]["Num"].match(regex);
+
+            if (!matches) continue;
+
+            var isExisting = false;
+
+            for (var j = 0; j < items.length; j++) {
+
+                if (Schools[i]["Id"] == items[j]["Id"]) {
+
+                    isExisting = true;
+                    break;
+                }
+            }
+
+            if (!isExisting) {
+
+                items.push({ Num: Schools[i]["Num"], Name: Schools[i]["Name"], FullName: Schools[i]["FullName"] });
+
+                var temp = items[items.length - 1];
+                for (var j = 0; j < matches.length; j++) {
+
+                    temp["FullName"] = temp["FullName"].replace(matches[j],
+                            matches[j]);
+                }
+            }
+        }
+    }
+
+    if (items.length == 0) return;
+
+    var pos = $("#txtSchool").position();
+    var schoolsListHtml = bindDataToTemplate(TEMPLATES.Schools, items);    
+    
+    $("#SCH").val("");
+
+    showAutoCompleteSchools(schoolsListHtml, pos.left, pos.top + 33);
+
+}
+
+function showAutoCompleteSchools(html, left, top) {
+
+    if ($(".auto-complete").length == 0) {
+        $(".form-horizontal .login").append("<ol class='auto-complete'>" + html + "</ol>");
+    } else {
+        $(".auto-complete").html(html);
+    }
+
+    $(".auto-complete").ready(function() {
+
+        top = top + "px", left = left + "px";
+
+        $(".auto-complete").css({ top: top, left: left, visibility: "visible", display: "" });
+
+        $(".auto-complete li").first().addClass("active");
+
+        $(".auto-complete li").bind("mouseover", function() {
+
+            $(".auto-complete li").removeClass("active");
+            $(this).addClass("active");
+        });
+
+        $(".auto-complete li").bind("click", function(event) {
+            addSchool(event);
+        });
+    });
+}
+
+function hideAutoCompleteSchools() {
+
+    $(".auto-complete").css({ visibility: "hidden", display: "none" });
+}
+
+function addSchool(event) {
+    $(".auto-complete li").each(function(index, elem) {
+        if ($(elem).hasClass("active")) {
+            var newIndex = (event.keyCode == 38) ? index - 1 : (event.keyCode == 13 || event.keyCode == 0) ? index : (event.keyCode == 40) ? index + 1 : index;
+
+            if (newIndex < 0) return;
+
+            if ($($(".auto-complete li").get(newIndex)).length > 0) {
+                $("#txtSchool").val(($($(".auto-complete li").get(newIndex)).html()));
+                $("#SCH").val(($($(".auto-complete li").get(newIndex)).attr("id")));
+            }
+            return false;
+        }
+    });
+    hideAutoCompleteSchools();
+}

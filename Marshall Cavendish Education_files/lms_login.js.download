@@ -1,0 +1,144 @@
+var reAlphanumeric = /^[a-zA-Z0-9_@.\-|\/]+$/; 
+var var_err_cookie = "Please set your browser to accept to cookies in order to access LEAD.";
+var var_err_component = "The Login component cannot be downloaded. Please refresh page.";
+var var_err_disable = "disabled";
+var var_confirm_session_replace = "You are already logged into LEAD. Your previous login session will be terminated. Continue?";
+var var_userid = "UserID";
+var var_emailid = "EmailID";
+var var_password = "Password";
+var var_email = "Email";
+var var_err_useridaplha = "User ID must be alphanumeric.";
+var var_err_emailidaplha = "Email ID must be alphanumeric.";
+var var_err_passwordaplha = "Password must be alphanumeric.";
+var var_err_validEmail = "Invaild Email.";
+var var_err_inconsistentpassword = "Inconsistent Password. Please enter again.";
+/*var reAlphanumeric = /^[a-zA-Z0-9_]+$/; */
+var reInvalidAlphanumeric = /^[^\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\_|\-|\+|\=|\{|\[|\}|\]|\||\\|\:|\;|\"|\'|\<|\,|\>|\.|\?|\/]+$/;
+var rePassword = /^[^\~|\`|\!|\#|\$|\%|\^|\&|\*|\(|\)|\+|\=|\{|\[|\}|\]|\||\\|\:|\;|\"|\'|\<|\,|\>|\?|\/]+$/;
+function isEmpty(s) {
+    return ((s == null) || (s.length == 0));
+}
+function isAlphanumeric_unicode(s) {
+    if (isEmpty(s)) {
+        if (isAlphanumeric_unicode.arguments.length == 1) {
+            return defaultEmptyOK;
+        } else {
+            return (isAlphanumeric_unicode.arguments[1] == true);
+        }
+    } else {
+        return reAlphanumeric.test(s);
+    }
+}
+function lostPassword() {
+    if (checkuid() && checksch()) {
+        document.forms(0).action = "LostPassword_Process.aspx?source=lms";
+        document.forms(0).txtFrmXMLSubmit.value = document.forms(0).UID.value + "@" + document.loginform.SCH.value;
+        document.forms(0).submit();
+    }
+} function checkuid() {
+    try {
+        var textbox = document.getElementById("UID");
+        var uidValue = trimstr(textbox.value);
+        textbox.value = uidValue;
+        if ((uidValue.length > 2) && (uidValue.toLowerCase().substring(0, 2) == "p_")) {
+            uidValue = uidValue.substring(2);
+        } if ((uidValue.length < 2) || (!isAlphanumeric_unicode(uidValue))) {
+            alert("Invalid Login ID. Please try again.");
+            textbox.focus(); 
+            return false;
+        } 
+        return true;
+    }
+    catch (er) {
+        return false;
+    }
+}
+function checkpwd() {
+    var textbox = document.getElementById("PWD");
+    if ((textbox.value.length < 1) || (!rePassword.test(textbox.value))) {
+        alert("Invalid Password. Please try again.");
+        textbox.focus();
+         return false;
+     }
+     return true;
+ }
+ function checksch() {
+     var textbox = document.getElementById("SCH");
+     var schValue = trimstr(textbox.value);
+     textbox.value = schValue; if ((schValue.length < 2) || (!isAlphanumeric_unicode(schValue)) && (schValue.toUpperCase() != "_ANYSCHOOL")) {
+         alert("Invalid School ID. Please try again.");
+         textbox.focus();
+         return false;
+     }
+     return true;
+} 
+function postdata() {
+    if (checkuid() && checksch() && checkpwd()) {      
+		if (IsPrevLoginUser()) { 
+			return;
+        }
+
+        touchServer("POST", "/LEAD/Login/lms_loginL.aspx?action=checksch", document.getElementById('SCH').value, function(txt) {
+            if (txt == "") {
+                var loginURL = "/LEAD/Home/Default.aspx?source=lms" + ((typeof (querystring) != "undefined" && querystring != "") ? ("&loginFrom=" + querystring) : "");
+                document.loginform.action = loginURL;
+                document.loginform.target = "_top";
+                document.loginform.submit();
+                document.getElementById("lnkGoButton").disabled = true;
+                return;
+            } else {
+                window.parent.location.href = txt; //"http://edu.mconline.sg";
+            }
+        });
+	} 
+} 
+function replacexmlstr(str) { var tmpstr = new String(str); tmpstr = tmpstr.replace("<", "&lt;"); tmpstr = tmpstr.replace(">", "&gt;"); tmpstr = tmpstr.replace("&", "&amp;"); return tmpstr; } function loginform_onkeydown(event) { var e = event || window.event; key = e.charCode || e.keyCode; if (key == 13) { postdata(); } } function onlogin() { postdata(); } 
+function IsPrevLoginUser() { 
+	if (prev_user != "") { 
+		try { 
+			var arrUserInfo = prev_user.split("&"); 
+			if (arrUserInfo.length > 1) { 
+				var uName = document.getElementById("UID").value; 
+				var sName = document.getElementById("SCH").value; 
+				if ((uName.toLowerCase() == arrUserInfo[0].toLowerCase()) && (sName.toLowerCase() == arrUserInfo[1].toLowerCase())) { 
+					return false; 
+				} else { 
+					DisableLogin(); 
+					alert("You didn't do a proper logout from your previous login session. Please close this browser and open a new browser to login again."); 
+					return true; 
+				} 
+			} 
+		} 
+		catch (ex) { } 
+	} 
+	return false; 
+} 
+function DisableLogin() { 
+	document.getElementById("UID").disabled = true; 
+	document.getElementById("SCH").disabled = true; 
+	document.getElementById("PWD").disabled = true; 
+	//document.getElementById("lnkGoButton").detachEvent("onclick", postdata); 
+} 
+function trimstr(str) { var trim_str = ""; var count = 0; var newArray = str.split(" "); for (var i = 0; i < newArray.length; i++) { if (newArray[i] != "") { if (count == 0) trim_str = newArray[i]; else trim_str = trim_str + " " + newArray[i]; count++; } } return trim_str; }
+
+function touchServer(method, target, data, callback) {
+    try {
+        var xmlhttpreq = makeReq();
+
+        if (xmlhttpreq) {
+            xmlhttpreq.open(method, target, false);
+            xmlhttpreq.onreadystatechange = function() {
+                if (xmlhttpreq.readyState == 4 && xmlhttpreq.status == 200) {
+                    callback(xmlhttpreq.responseText, data);
+                }
+            };
+            xmlhttpreq.send(data);
+        }
+        else {
+            throw ("Error occurred when connecting to server.");
+        }
+    }
+    catch (e) {
+        alert(e);
+    }
+}
